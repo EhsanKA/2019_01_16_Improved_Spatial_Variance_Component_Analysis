@@ -1,0 +1,2 @@
+# 2019_01_16_Improved_Spatial_Variance_Component_Analysis
+Improving SVCA Model.
