@@ -79,4 +79,12 @@ def comparing_losses(svca_losses, tensorflow_loss, selected_proteins):
     plt.show()
 
 
-
+def saveTensorflowParams(sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input):
+    np.save('../experiments_data/reproducing/sigmas_for_multiple_random_input', np.array((sigmas_for_multiple_random_input)))
+    np.save('../experiments_data/reproducing/opt_sigmas_for_multiple_random_input', np.array((opt_sigmas_for_multiple_random_input)))
+    
+def loadTensorflowParams():
+    sigmas_for_multiple_random_input = np.load('../experiments_data/reproducing/sigmas_for_multiple_random_input.npy')
+    opt_sigmas_for_multiple_random_input = np.load('../experiments_data/reproducing/opt_sigmas_for_multiple_random_input.npy')
+    return sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input
+    
