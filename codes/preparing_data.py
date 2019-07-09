@@ -1,6 +1,6 @@
 import numpy as np
-from utils import *
-from loader import *
+from codes.utils import *
+from codes.loader import *
 
 def preprocessing_data(path, sample_name):
     expressions, possitions, protein_names = loading_pure_data(path=path, sample_name=sample_name)
