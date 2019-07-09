@@ -5,6 +5,7 @@ import scipy as sp
 from scipy import special
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from codes.reconstructing_with_numpy import *
 import os
 
 
@@ -93,3 +94,26 @@ def loadTensorflowParams():
         '../experiments_data/reproducing/opt_sigmas_for_multiple_random_input.npy')
     return sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input
 
+
+def producing_gowers(protein_index, expressions, positions, sigmas):
+    kinships = making_kinships(positions, protein_index, expressions, sigmas[0], sigmas[1], sigmas[2], sigmas[3],
+                               sigmas[4])
+    g1 = 1. / covar_rescaling_factor(kinships[1])
+    g2 = 1. / covar_rescaling_factor(kinships[2])
+    g3 = 1. / covar_rescaling_factor(kinships[3])
+    g4 = 1. / covar_rescaling_factor(kinships[4])
+    return [g1, g2, g3, g4]
+
+# a test for before function
+
+# _path = '../'
+# _sample_name = 'P1_SAy10x1_G1'
+#
+# expressions, locations, protein_names = loading_pure_data(_path, _sample_name)
+# dist = distance_matrix(locations)
+# all_x, all_y = preprocessing_data(_path, _sample_name)
+#
+# sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input = loadTensorflowParams()
+# sigs = opt_sigmas_for_multiple_random_input[0][0]
+#
+# a = producing_gowers(1, expressions, locations, sigs)
