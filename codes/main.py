@@ -3,11 +3,12 @@ import tensorflow as tf
 from codes.utils import *
 from codes.preparing_data import *
 from codes.loader import *
+from codes.reconstructing_with_numpy import *
 import os
 
 ix = tf.placeholder(shape=[None, None], dtype=tf.float64, name="x")
 y = tf.placeholder(shape=[None, 1], dtype=tf.float64, name="y")
-possition = tf.placeholder(shape=[None, None], dtype=tf.float64, name="position")
+position = tf.placeholder(shape=[None, None], dtype=tf.float64, name="position")
 
 # randoms = tf.random_uniform([5], minval=0, maxval=100, dtype=tf.float64)
 randoms = [1., 1., 1., 1., 20.]
@@ -32,7 +33,7 @@ def env_pos(x):
 
 
 l = tf.Variable(randoms[4], dtype=tf.float64, name="l")
-zzt = tf.map_fn(env_pos, possition)
+zzt = tf.map_fn(env_pos, position)
 sig2_pow2 = sig2*sig2
 cov_matrix2 = sig2_pow2 * zzt
 
@@ -87,8 +88,8 @@ opt_loss_for_multiple_random_input = []
 sigmas_for_multiple_random_input = []
 opt_sigmas_for_multiple_random_input = []
 # selected_proteins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,25]
-# selected_proteins = [0, 1, 5, 7, 10, 15, 21, 25]
-selected_proteins = [1]
+selected_proteins = [0, 1, 5, 7, 10, 15, 21, 25]
+# selected_proteins = [1]
 
 # initial values are not important yet so i do not save theme
 
@@ -104,8 +105,8 @@ with tf.Session() as sess:
         opt_sigmas_selected_proteins = []
 
         threshold = 0.1
-        learning_rate = 0.1
-        learning_rate_1 = 0.1
+        learning_rate = 0.08
+        learning_rate_1 = 0.08
         learning_rate_2 = 1.5
 
         for j in selected_proteins:
@@ -121,11 +122,11 @@ with tf.Session() as sess:
 
             while (i < epochs) and (abs(last_loss - new_loss) > threshold) and (
                     last_loss == np.inf or min_loss_ever == np.inf or last_loss == min_loss_ever or (
-                    (last_loss - min_loss_ever) / abs(min_loss_ever) < 0.6)):
+                    (last_loss - min_loss_ever) / abs(min_loss_ever) < 10)):
                 #             while( (i < epochs) and (abs(last_loss-new_loss)>threshold)):
                 a, b, c, d, lt, opt, run_loss, l_term1, l_term2, cov1, cov2, cov3, cov4, s1p2, s2p2, s3p2, s4p2= sess.run(
                     [sig1, sig2, sig3, sig4, l, optimizer, loss, loss_term1, loss_term2, cov_matrix1, cov_matrix2, cov_matrix3, cov_matrix4, sig1_pow2, sig2_pow2, sig3_pow2,sig4_pow2],
-                    feed_dict={ix: all_x[j], y: all_y[j], possition: dist, lr: learning_rate})
+                    feed_dict={ix: all_x[j], y: all_y[j], position: dist, lr: learning_rate})
 
                 run_loss = run_loss[0]
                 i += 1
@@ -161,13 +162,13 @@ with tf.Session() as sess:
 
             # loading opt conds!
             # sess.run([tf.assign(sig1, s1_opt), tf.assign(sig2, s2_opt), tf.assign(sig3, s3_opt), tf.assign(sig4, s4_opt), tf.assign(l, l_opt)])
-            # print("sig1 is: ", s1_opt, "sig2 is: ", s2_opt, "sig3 is: ", s3_opt, "sig4 is: ", s4_opt, "The L is: ", l_opt, "Loss is: ", min_loss_ever)
+            print("sig1 is: ", s1_opt, "sig2 is: ", s2_opt, "sig3 is: ", s3_opt, "sig4 is: ", s4_opt, "The L is: ", l_opt, "Loss is: ", min_loss_ever)
 
         loss_for_multiple_random_input.append(loss_for_selected_proteins)
         opt_loss_for_multiple_random_input.append(opt_loss_for_selected_proteins)
         sigmas_for_multiple_random_input.append(sigmas_for_selected_proteins)
         opt_sigmas_for_multiple_random_input.append(opt_sigmas_selected_proteins)
-        # print(min_loss_ever)
+
 
 
 saveTensorflowParams(sigmas_for_multiple_random_input,opt_sigmas_for_multiple_random_input)
