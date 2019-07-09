@@ -3,7 +3,7 @@ import numpy as np
 from codes.preparing_data import *
 import os
 
-
+# this method returns all four matrices with their multipliers + sum of theme
 def making_kinships(pos, protein_index, data, sigma1, sigma2, sigma3, sigma4, l):
     t1 = making_intrinsic(protein_index, data)
     t2 = making_environment(pos=pos, l=l)
@@ -59,6 +59,7 @@ def making_noise(n):
     return np.eye(n)
 
 
+# reproducing loss with numpy
 def loglikelihood(x, sigma):
     sign, logdet = np.linalg.slogdet(sigma)
     t2 = sign * logdet
