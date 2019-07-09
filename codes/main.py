@@ -21,7 +21,7 @@ lr = tf.placeholder(shape=[], dtype=tf.float64, name='lr')
 # cov_matrix1 sigma* matrix
 x = ix - tf.reduce_mean(ix, 0)
 xxt = tf.matmul(x, tf.transpose(x))
-sig1_pow2 = tf.pow(sig1, 2)
+sig1_pow2 = sig1*sig1
 
 cov_matrix1 = sig1_pow2 * xxt
 
@@ -33,26 +33,24 @@ def env_pos(x):
 
 l = tf.Variable(randoms[4], dtype=tf.float64, name="l")
 zzt = tf.map_fn(env_pos, possition)
-sig2_pow2 = tf.pow(sig2, 2)
+sig2_pow2 = sig2*sig2
 cov_matrix2 = sig2_pow2 * zzt
 
 # cov_matrix3 sigma* matrix
 u = tf.ones_like(xxt)
 v = tf.eye(tf.shape(xxt)[0])
-# num_of_cells = 690
-# n = tf.constant(num_of_cells, dtype=tf.float64)
 mask = tf.cast(u, dtype=tf.float64) - tf.cast(v, dtype=tf.float64)
 weight = tf.math.multiply(mask, zzt)
 zx = tf.matmul(weight, x)
-old_zxxzt = tf.matmul(zx, tf.transpose(zx))
-zxxzt = old_zxxzt
-sig3_pow2 = tf.pow(sig3, 2)
+zxxzt = tf.matmul(zx, tf.transpose(zx))
+sig3_pow2 = sig3*sig3
 cov_matrix3 = sig3_pow2 * zxxzt
 
 # cov_matrix4 sigma* matrix
 noise__ = tf.eye(tf.shape(xxt)[0])
 noise = tf.cast(noise__, dtype=tf.float64)
-sig4_pow2 = tf.pow(sig4, 2)
+sig4_1 = sig4
+sig4_pow2 = sig4 * sig4_1
 cov_matrix4 = sig4_pow2 * noise
 
 # main covariance matrix
@@ -77,7 +75,7 @@ optimizer = tf.train.AdamOptimizer(learning_rate=lr).minimize(loss)
 # Main #####
 import time
 
-_path = os.getcwd() + '/'
+_path = '../'
 _sample_name = 'P1_SAy10x1_G1'
 
 _, locations, protein_names = loading_pure_data(path=_path, sample_name=_sample_name)
@@ -90,7 +88,7 @@ sigmas_for_multiple_random_input = []
 opt_sigmas_for_multiple_random_input = []
 # selected_proteins = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,25]
 # selected_proteins = [0, 1, 5, 7, 10, 15, 21, 25]
-selected_proteins = [1, 3]
+selected_proteins = [1]
 
 # initial values are not important yet so i do not save theme
 
@@ -125,8 +123,8 @@ with tf.Session() as sess:
                     last_loss == np.inf or min_loss_ever == np.inf or last_loss == min_loss_ever or (
                     (last_loss - min_loss_ever) / abs(min_loss_ever) < 0.6)):
                 #             while( (i < epochs) and (abs(last_loss-new_loss)>threshold)):
-                a, b, c, d, lt, opt, run_loss, = sess.run(
-                    [sig1, sig2, sig3, sig4, l, optimizer, loss],
+                a, b, c, d, lt, opt, run_loss, l_term1, l_term2, cov1, cov2, cov3, cov4, s1p2, s2p2, s3p2, s4p2= sess.run(
+                    [sig1, sig2, sig3, sig4, l, optimizer, loss, loss_term1, loss_term2, cov_matrix1, cov_matrix2, cov_matrix3, cov_matrix4, sig1_pow2, sig2_pow2, sig3_pow2,sig4_pow2],
                     feed_dict={ix: all_x[j], y: all_y[j], possition: dist, lr: learning_rate})
 
                 run_loss = run_loss[0]
@@ -140,6 +138,10 @@ with tf.Session() as sess:
                 if min_loss_ever > run_loss:
                     min_loss_ever = run_loss
                     s1_opt, s2_opt, s3_opt, s4_opt, l_opt = (a, b, c, d, lt)
+
+                    # use these parameters for test numpy reconstruction
+                    # l_term1_opt, l_term2_opt, cov1_opt, cov2_opt, cov3_opt, cov4_opt = l_term1, l_term2, cov1, cov2, cov3, cov4
+                    # s1p2_opt, s2p2_opt, s3p2_opt, s4p2_opt = s1p2, s2p2, s3p2, s4p2
                 #                         cm1_opt, cm2_opt, cm3_opt, cm4_opt = (cm1, cm2, cm3, cm4)
                 if run_loss > 1500:
                     learning_rate = learning_rate_2
@@ -155,21 +157,20 @@ with tf.Session() as sess:
             sigmas_for_selected_proteins.append(sigmas_for_one_protein)
             opt_sigmas_selected_proteins.append(opt_sigmas_one_protein)
 
-            t1 = time.time()
             print(i)
 
             # loading opt conds!
-        #             sess.run([tf.assign(sig1, s1_opt), tf.assign(sig2, s2_opt), tf.assign(sig3, s3_opt), tf.assign(sig4, s4_opt), tf.assign(l, l_opt)])
+            # sess.run([tf.assign(sig1, s1_opt), tf.assign(sig2, s2_opt), tf.assign(sig3, s3_opt), tf.assign(sig4, s4_opt), tf.assign(l, l_opt)])
+            # print("sig1 is: ", s1_opt, "sig2 is: ", s2_opt, "sig3 is: ", s3_opt, "sig4 is: ", s4_opt, "The L is: ", l_opt, "Loss is: ", min_loss_ever)
 
-        #             print("sig1 is: ", s1_opt, "sig2 is: ", s2_opt, "sig3 is: ", s3_opt, "sig4 is: ", s4_opt, "The L is: ", l_opt, "Loss is: ", min_loss_ever)
-        #             print("sig1 is: ", gowers[-1][0], "sig2 is: ", gowers[-1][1], "sig3 is: ", gowers[-1][2], "sig4 is: ", gowers[-1][3], "The L is: ", l_opt, "Loss is: ", min_loss_ever)
-        #             print("time of calculation for ***",prot_names[j],"*** is: " ,t1-t0)
-        #             print("--------------------------------------")
         loss_for_multiple_random_input.append(loss_for_selected_proteins)
         opt_loss_for_multiple_random_input.append(opt_loss_for_selected_proteins)
         sigmas_for_multiple_random_input.append(sigmas_for_selected_proteins)
         opt_sigmas_for_multiple_random_input.append(opt_sigmas_selected_proteins)
+        # print(min_loss_ever)
 
+
+saveTensorflowParams(sigmas_for_multiple_random_input,opt_sigmas_for_multiple_random_input)
 
 svca_loss = loading_losses_of_svca(protein_names, selected_proteins, _path, _sample_name)
 comparing_losses(svca_loss, opt_loss_for_multiple_random_input[0], selected_proteins)
