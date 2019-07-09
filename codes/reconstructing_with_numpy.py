@@ -70,7 +70,7 @@ def loglikelihood(x, sigma):
     return 0.5 * (t2 + t3)[0][0]
 
 
-# test for protein number 5 where selected_proteins = [1]
+# test for protein number 1 where selected_proteins = [1]
 
 _path = '../'
 _sample_name = 'P1_SAy10x1_G1'
