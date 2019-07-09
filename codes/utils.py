@@ -5,7 +5,6 @@ import scipy as sp
 from scipy import special
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 
 
@@ -77,19 +76,20 @@ def comparing_losses(svca_losses, tensorflow_loss, selected_proteins):
     plt.xlabel("proteins " + str(selected_proteins))
     plt.ylabel("loss without fix term")
     plt.title("comparing the losses")
-    plt.savefig('results/comparison/comparing_the_losses_of_SVCA_and_Tensorflow_model.png', dpi=500)
+    plt.savefig('../results/comparison/comparing_the_losses_of_SVCA_and_Tensorflow_model.png', dpi=500)
     plt.show()
 
 
 def saveTensorflowParams(sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input):
-    np.save('experiments_data/reproducing/sigmas_for_multiple_random_input',
+    np.save('../experiments_data/reproducing/sigmas_for_multiple_random_input',
             np.array((sigmas_for_multiple_random_input)))
-    np.save('experiments_data/reproducing/opt_sigmas_for_multiple_random_input',
+    np.save('../experiments_data/reproducing/opt_sigmas_for_multiple_random_input',
             np.array((opt_sigmas_for_multiple_random_input)))
 
 
 def loadTensorflowParams():
-    sigmas_for_multiple_random_input = np.load('experiments_data/reproducing/sigmas_for_multiple_random_input.npy')
+    sigmas_for_multiple_random_input = np.load('../experiments_data/reproducing/sigmas_for_multiple_random_input.npy')
     opt_sigmas_for_multiple_random_input = np.load(
-        'experiments_data/reproducing/opt_sigmas_for_multiple_random_input.npy')
+        '../experiments_data/reproducing/opt_sigmas_for_multiple_random_input.npy')
     return sigmas_for_multiple_random_input, opt_sigmas_for_multiple_random_input
+
